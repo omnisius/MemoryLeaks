@@ -1,0 +1,82 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+CREATE SCHEMA IF NOT EXISTS `credit_database` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
+USE `credit_database` ;
+
+-- -----------------------------------------------------
+-- Table `credit_database`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `credit_database`.`user` (
+  `id` BIGINT NOT NULL,
+  `fio` VARCHAR(45) NOT NULL,
+  `login` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(45) NOT NULL,
+  `type` VARCHAR(5) NULL,
+  PRIMARY KEY (`id`, `fio`),
+  UNIQUE INDEX `login_UNIQUE` (`login` ASC),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `credit_database`.`card`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `credit_database`.`card` (
+  `idcard` INT NOT NULL AUTO_INCREMENT,
+  `card_number` BIGINT NOT NULL,
+  `users_id` BIGINT NOT NULL,
+  PRIMARY KEY (`idcard`, `users_id`),
+  UNIQUE INDEX `card_number_UNIQUE` (`card_number` ASC),
+  UNIQUE INDEX `idcard_UNIQUE` (`idcard` ASC),
+  INDEX `card_to_user_idx` (`users_id` ASC),
+  CONSTRAINT `card_to_user`
+    FOREIGN KEY (`users_id`)
+    REFERENCES `credit_database`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `credit_database`.`account`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `credit_database`.`account` (
+  `idaccount` INT NOT NULL AUTO_INCREMENT,
+  `money` FLOAT NULL,
+  `status` VARCHAR(6) NULL,
+  `account_number` BIGINT NOT NULL,
+  `account_card` BIGINT NOT NULL,
+  PRIMARY KEY (`idaccount`, `account_card`, `account_number`),
+  UNIQUE INDEX `account_number_UNIQUE` (`account_number` ASC),
+  UNIQUE INDEX `idaccount_UNIQUE` (`idaccount` ASC),
+  INDEX `account_to_card_idx` (`account_card` ASC),
+  CONSTRAINT `account_to_card`
+    FOREIGN KEY (`account_card`)
+    REFERENCES `credit_database`.`card` (`idcard`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `credit_database`.`payment`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `credit_database`.`payment` (
+  `idpayment` INT NOT NULL AUTO_INCREMENT,
+  `payment_sum` FLOAT NULL,
+  `payment_from_account` BIGINT NOT NULL,
+  PRIMARY KEY (`idpayment`, `payment_from_account`),
+  UNIQUE INDEX `idpayment_UNIQUE` (`idpayment` ASC),
+  CONSTRAINT `payment_to_account`
+    FOREIGN KEY (`payment_from_account`)
+    REFERENCES `credit_database`.`account` (`account_number`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
