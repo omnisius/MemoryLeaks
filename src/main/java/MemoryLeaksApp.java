@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Map;
 import java.util.Scanner;
 
 public class MemoryLeaksApp {
@@ -10,6 +11,13 @@ public class MemoryLeaksApp {
         MemoryLeaksApp memoryLeaksApp = new MemoryLeaksApp();
         //push string in memory pool
         memoryLeaksApp.getLongFile().intern();
+
+        memoryLeaksApp.createLeakWithBadKey();
+    }
+
+    private void createLeakWithBadKey() {
+        Map map = System.getProperties();
+        map.put(new BadKey("key"), "value");
     }
 
     private String getLongFile() {
@@ -29,6 +37,15 @@ public class MemoryLeaksApp {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    class BadKey {
+        // no hashCode or equals
+        final String key;
+
+        public BadKey(String key) {
+            this.key = key;
         }
     }
 }
