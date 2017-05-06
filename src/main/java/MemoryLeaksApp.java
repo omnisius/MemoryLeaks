@@ -17,7 +17,7 @@ public class MemoryLeaksApp {
 
         memoryLeaksApp.createLeakWithBadKey();
 
-        getOOMwithUnsafe();
+        memoryLeaksApp.getOOMwithUnsafe();
     }
 
     private void createLeakWithBadKey() {
@@ -41,7 +41,7 @@ public class MemoryLeaksApp {
             return str;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return FILE_NAME;
         }
     }
 
@@ -54,17 +54,14 @@ public class MemoryLeaksApp {
         }
     }
 
-    private static void getOOMwithUnsafe() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    private void getOOMwithUnsafe() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         Class unsafeClass = Class.forName("sun.misc.Unsafe");
         Field f = unsafeClass.getDeclaredField("theUnsafe");
         f.setAccessible(true);
         Unsafe unsafe = (Unsafe) f.get(null);
-        try
-        {
-            for(;;) {
-                unsafe.allocateMemory(1024 * 1024);
-            }
-        } catch(Error e) {
+        try {
+            unsafe.allocateMemory(1024 * 1024);
+        } catch(Throwable e) {
             e.printStackTrace();
         }
     }
