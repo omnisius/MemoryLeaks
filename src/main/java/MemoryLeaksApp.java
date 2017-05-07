@@ -12,12 +12,15 @@ public class MemoryLeaksApp {
 
     public static void main(String[] args) throws Exception{
         MemoryLeaksApp memoryLeaksApp = new MemoryLeaksApp();
-        //push string in memory pool
-        memoryLeaksApp.getLongFile().intern();
 
         memoryLeaksApp.getOOMwithUnsafe();
 
         startJetty();
+
+        for(;;) {
+            //push string in memory pool
+            memoryLeaksApp.getLongFile().intern();
+        }
     }
 
 
@@ -41,15 +44,6 @@ public class MemoryLeaksApp {
         }
     }
 
-    class BadKey {
-        // no hashCode or equals
-        final String key;
-
-        BadKey(String key) {
-            this.key = key;
-        }
-    }
-
     private void getOOMwithUnsafe() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         Class unsafeClass = Class.forName("sun.misc.Unsafe");
         Field f = unsafeClass.getDeclaredField("theUnsafe");
@@ -62,20 +56,14 @@ public class MemoryLeaksApp {
         }
     }
 
-    private static void startJetty(){
+    private static void startJetty() {
         Server server = new Server(2017);
-
-        try
-        {
+        try {
             server.start();
             server.join();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally
-        {
+        } finally {
             server.destroy();
         }
     }
