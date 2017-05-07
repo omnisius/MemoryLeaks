@@ -1,9 +1,9 @@
+import org.eclipse.jetty.server.Server;
 import sun.misc.Unsafe;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.lang.reflect.Field;
-import java.util.Map;
 import java.util.Scanner;
 
 public class MemoryLeaksApp {
@@ -15,15 +15,11 @@ public class MemoryLeaksApp {
         //push string in memory pool
         memoryLeaksApp.getLongFile().intern();
 
-        memoryLeaksApp.createLeakWithBadKey();
-
         memoryLeaksApp.getOOMwithUnsafe();
+
+        startJetty();
     }
 
-    private void createLeakWithBadKey() {
-        Map map = System.getProperties();
-        map.put(new BadKey("key"), "value");
-    }
 
     private String getLongFile() {
         try {
@@ -63,6 +59,24 @@ public class MemoryLeaksApp {
             unsafe.allocateMemory(1024 * 1024);
         } catch(Throwable e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void startJetty(){
+        Server server = new Server(2017);
+
+        try
+        {
+            server.start();
+            server.join();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            server.destroy();
         }
     }
 }
